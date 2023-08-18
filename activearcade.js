@@ -2,7 +2,7 @@ let myCanvas = document.getElementById('myVideoCanvas');
 let myVideo = document.getElementById('myVideo'); // video tag where the audiences video will be shown
 let points = []
 
-let c1 = "green",max = 0,min = 0,a=true
+let c1 = "red", max = 0, min = 0, a = true, count = 0
 let pointer = 0
 
 
@@ -85,23 +85,24 @@ let startMyCamera = async (e) => {
 
 }
 
-function evaluate(res){
-    if(res<20){
-        if(a){
-            a=false
-            min = 200,max =410
+function evaluate(res) {
+    if (res < 20) {
+        if (a) {
+            a = false
+            min = 250, max = 450
         }
-        else{
-            a=true
-            min = 10,max =200
+        else {
+            a = true
+            min = 10, max = 300
         }
-        pointer= pointer+1
+        pointer = pointer + 1
         next = false
-        c1 = "green"
+        c1 = "red"
+        count += 1
 
     }
 
-    
+
 }
 
 let detectPoseMine = async () => {
@@ -119,40 +120,50 @@ let detectPoseMine = async () => {
         for (let i = 0; i < myPose[0].keypoints.length; i++) {
             if (myPose[0]) {
                 const context = myCanvas.getContext('2d');
-                if(a){
+                if (a) {
                     rx = myPose[0].keypoints[9].x / myVideo.videoWidth * width;
                     ry = myPose[0].keypoints[9].y / myVideo.videoHeight * myHeight;
 
                 }
-                else{
+                else {
                     rx = myPose[0].keypoints[10].x / myVideo.videoWidth * width;
                     ry = myPose[0].keypoints[10].y / myVideo.videoHeight * myHeight;
 
                 }
-                
+
                 context.beginPath();
                 context.arc(rx, ry, 30, 0, 2 * Math.PI);
                 context.fillStyle = "blue";
                 context.fill();
                 context.closePath();
                 if (!next) {
-                    let x = Math.floor((Math.random() * (max-min)+1) + min);
+                    let x = Math.floor((Math.random() * (max - min) + 1) + min);
                     let y = Math.floor((Math.random() * 400) + 1);
-                    console.log(a,x,y)
-                    
                     let p2 = { x: x, y: y }
                     points.push(p2)
                     next = true
 
                 }
-                context.beginPath()
-                context.arc(points[pointer].x, points[pointer].y, 30, 0, 2 * Math.PI);
-                context.fillStyle = c1;
-                context.fill();
-                context.closePath();
-                let p1 = { x: rx, y: ry }
-                let res = calculateDistance(p1, {x:points[pointer].x,y:points[pointer].y})
-                evaluate(res)
+
+                if (count < 10) {
+                    context.beginPath()
+                    context.arc(points[pointer].x, points[pointer].y, 30, 0, 2 * Math.PI);
+                    context.fillStyle = c1;
+                    context.fill();
+                    context.closePath();
+                    let p1 = { x: rx, y: ry }
+                    let res = calculateDistance(p1, { x: points[pointer].x, y: points[pointer].y })
+                    evaluate(res)
+                    document.getElementById("Score").setAttribute('value', count);
+                    document.getElementById("result").setAttribute('value', 'Pending');
+
+                }
+                else{
+                    document.getElementById("result").setAttribute('value', 'Task Completed');
+
+
+                }
+                
 
 
 
